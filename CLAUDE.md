@@ -48,10 +48,46 @@ Lees dat bestand eerst bij twijfel over scope, requirements of eerdere keuzes.
    specifieke wedstrijd — nog te verifiëren of cuescore dat apart bijhoudt.
 
 ## Azure-resources (rg-mokum-competitie, westeurope)
-- Function App: `func-mokum-competitie` (Linux, Node 24 — Node 20 is inmiddels EOL,
-  dus lesson [1] uit de tools-repo setup-script is achterhaald op dit punt)
+- Function App: `func-mokum-competitie` (Linux Consumption, **Node 22** — zie lesson
+  hieronder over waarom niet Node 24, ook al is Node 20 inmiddels EOL)
 - Storage account: `stmokumcompetitie`
 - Budget: €10/maand, alerts bij 50/80/100% naar peterdeswart96@gmail.com
+- Endpoints live: `GET /api/teams`, `GET /api/ics/{teamSlug}` (CORS toegestaan voor
+  `https://mokum-competitie.pdscloud.nl`)
+
+### Lesson [1c] — Node 24 geeft permanente 503 op Linux Consumption (opgelost, 2026-08-31)
+Een verse Function App met `linuxFxVersion "Node|24"` bleef na deploy vastzitten op
+HTTP 503 op zowel het hoofdendpoint als het SCM/Kudu-endpoint, ook na meerdere restarts
+en een stop/start-cyclus (25+ minuten, geen cold-start). `az functionapp show` bleef
+`state: Running` melden — misleidend. `syncfunctiontriggers` faalde met
+`{"Code":"BadRequest","Message":"Encountered an error (ServiceUnavailable) from host
+runtime."}`.
+
+**Bevestigde oorzaak:** `az functionapp list-runtimes --os linux` toont Node 24 wel als
+optie, maar dat valideert niet of het image ook echt uitrolt op het **Consumption**-plan
+specifiek (in tegenstelling tot Premium/Dedicated) — `az functionapp create` checkt dit
+niet bij het aanmaken, dus de fout komt pas aan het licht bij de eerste boot-poging.
+Zelfde faalmodus als de oudere Node 20/EOL-ervaring (lesson [1]), nu bij de nieuwe kant
+van het runtime-spectrum.
+
+**Fix (bevestigd):**
+```bash
+az functionapp config set -g rg-mokum-competitie -n func-mokum-competitie --linux-fx-version "Node|22"
+az functionapp restart -g rg-mokum-competitie -n func-mokum-competitie
+# daarna opnieuw deployen — de package die er al stond werkte niet vanzelf mee:
+az functionapp deployment source config-zip -g rg-mokum-competitie -n func-mokum-competitie --src <zip>
+```
+Binnen een minuut na de Node 22-restart ging het hoofdendpoint van 503 naar 404 (host
+draait, geen functions geladen) — pas na de herdeploy van een **verse** zip (met alle
+huidige functiebestanden; een oudere zip miste een inmiddels toegevoegde function) kwamen
+beide endpoints (`/api/teams`, `/api/ics/{teamSlug}`) goed op 200.
+
+**Les voor volgende projecten:** bij een gloednieuwe Linux Consumption Function App die
+na deploy blijvend 503 geeft (geen cold start, > 10 min): verdenk eerst de gekozen
+`linuxFxVersion` runtime-versie, ook als die met `list-runtimes` als "beschikbaar" wordt
+getoond. Downgrade naar een oudere, bewezen stabiele versie (bv. Node 22) is een snelle
+test. Dit blokje is een kandidaat om als herbruikbare `algemeen/valkuil-*.md` in de
+kennisbank-repo vast te leggen.
 
 ## Setup
 De skills `pdscloud-project-setup` en `github-pages-subdomain` bleken niet aanwezig op de
