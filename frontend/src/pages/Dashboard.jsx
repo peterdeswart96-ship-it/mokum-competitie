@@ -17,10 +17,14 @@ const REMINDER_OPTIONS = [
 // toont de resterende unieke waarden. Nu is er per stap vaak maar één optie (alleen
 // Mokum, alleen Noord-Holland), maar de wizard groeit vanzelf mee zodra er teams van
 // andere poolcentra/regio's/niveaus bijkomen — geen hardcoded opties nodig.
+// Niveau vóór regio: Klasses zijn regionaal ingedeeld (bv. Noord-Holland), maar
+// Eredivisie/Divisies zijn landelijk of over een grotere regio (bv. "Noord-West")
+// verdeeld. Regio eerst vragen zou "Noord-Holland" auto-invullen en Eredivisie/Divisie
+// dan verbergen (ze horen niet bij die regio) — vandaar deze volgorde.
 const STAPPEN = [
   { key: 'poolcentrum', vraag: 'Bij welk poolcentrum speel je?' },
-  { key: 'regio', vraag: 'In welke regio?' },
   { key: 'niveauCategorie', vraag: 'Op welk niveau?' },
+  { key: 'regio', vraag: 'In welke regio?' },
   { key: 'teamSlug', vraag: 'Welk team?' },
 ]
 
@@ -39,6 +43,23 @@ function opties(stapKey, teams, answers) {
   return uniek.map((v) => ({ value: v, label: v }))
 }
 
+// Vult elke onbeantwoorde stap automatisch in zolang er (gegeven de eerdere
+// antwoorden) maar één mogelijke waarde is — zowel bij het eerste laden als na elke
+// handmatige keuze, zodat je nooit hoeft te klikken op een stap zonder echte keuze.
+function autoFillCascade(teams, beginAnswers) {
+  let answers = { ...beginAnswers }
+  for (const stap of STAPPEN) {
+    if (answers[stap.key]) continue
+    const mogelijk = opties(stap.key, teams, answers)
+    if (mogelijk.length === 1) {
+      answers = { ...answers, [stap.key]: mogelijk[0].value }
+    } else {
+      break
+    }
+  }
+  return answers
+}
+
 function Wizard({ teams, answers, setAnswers }) {
   const huidigeStapIndex = STAPPEN.findIndex((s) => !answers[s.key])
   const beantwoord = STAPPEN.slice(0, huidigeStapIndex)
@@ -48,7 +69,7 @@ function Wizard({ teams, answers, setAnswers }) {
     const nieuw = { ...answers, [stapKey]: value }
     // eerdere keuze wijzigen? verder gelegen antwoorden vervallen dan
     for (const s of STAPPEN.slice(na + 1)) nieuw[s.key] = ''
-    setAnswers(nieuw)
+    setAnswers(autoFillCascade(teams, nieuw))
   }
 
   const huidigeStap = STAPPEN[huidigeStapIndex]
@@ -115,15 +136,7 @@ function Dashboard() {
       })
       .then((data) => {
         setTeams(data)
-        // Als er maar één mogelijke waarde is per stap, alvast invullen zodat je niet
-        // door schijnkeuzes hoeft te klikken (bv. nu alleen "Mokum" en "Noord-Holland").
-        let voorlopig = { poolcentrum: '', regio: '', niveauCategorie: '', teamSlug: '' }
-        for (const stap of STAPPEN) {
-          const mogelijk = opties(stap.key, data, voorlopig)
-          if (mogelijk.length === 1) voorlopig = { ...voorlopig, [stap.key]: mogelijk[0].value }
-          else break
-        }
-        setAnswers(voorlopig)
+        setAnswers(autoFillCascade(data, { poolcentrum: '', regio: '', niveauCategorie: '', teamSlug: '' }))
       })
       .catch(() => setError(true))
   }, [])
