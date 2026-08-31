@@ -13,13 +13,17 @@ app.http('ics', {
       return { status: 404, body: `Onbekend team: ${request.params.teamSlug}` };
     }
 
-    const includeReminder = request.query.get('reminder') !== 'off';
+    const ALLOWED_REMINDER_MINUTES = [0, 60, 120, 240, 1440];
+    const reminderParam = request.query.get('reminder');
+    const reminderMinutes = reminderParam === 'off'
+      ? 0
+      : ALLOWED_REMINDER_MINUTES.includes(Number(reminderParam)) ? Number(reminderParam) : 60;
 
     try {
       const tournament = await fetchTournament(team.cuescoreTournamentId);
       const matches = getTeamMatches(tournament, team.cuescoreTeamId);
       const ics = generateIcs(matches, team.teamName, {
-        includeReminder,
+        reminderMinutes,
         calendarName: `${team.teamName} - ${team.competitionName}`,
       });
 

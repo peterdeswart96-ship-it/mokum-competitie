@@ -1,5 +1,5 @@
-const DEFAULT_DURATION_MINUTES = 180;
-const REMINDER_MINUTES_BEFORE = 60;
+const DEFAULT_DURATION_MINUTES = 240;
+const DEFAULT_REMINDER_MINUTES = 60;
 
 function foldLine(line) {
   const bytes = Buffer.byteLength(line, 'utf8');
@@ -39,7 +39,7 @@ function addMinutes(isoString, minutes) {
   return date.toISOString();
 }
 
-function matchToEvent(match, teamName, { includeReminder = true } = {}) {
+function matchToEvent(match, teamName, { reminderMinutes = DEFAULT_REMINDER_MINUTES } = {}) {
   const summary = match.isHome
     ? `${teamName} - ${match.opponent}`
     : `${match.opponent} - ${teamName}`;
@@ -61,12 +61,12 @@ function matchToEvent(match, teamName, { includeReminder = true } = {}) {
     `URL:${match.matchUrl}`,
   ];
 
-  if (includeReminder) {
+  if (reminderMinutes > 0) {
     lines.push(
       'BEGIN:VALARM',
       'ACTION:DISPLAY',
       `DESCRIPTION:${escapeText(summary)}`,
-      `TRIGGER:-PT${REMINDER_MINUTES_BEFORE}M`,
+      `TRIGGER:-PT${reminderMinutes}M`,
       'END:VALARM'
     );
   }
@@ -75,7 +75,7 @@ function matchToEvent(match, teamName, { includeReminder = true } = {}) {
   return lines;
 }
 
-function generateIcs(matches, teamName, { includeReminder = true, calendarName } = {}) {
+function generateIcs(matches, teamName, { reminderMinutes = DEFAULT_REMINDER_MINUTES, calendarName } = {}) {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -89,7 +89,7 @@ function generateIcs(matches, teamName, { includeReminder = true, calendarName }
   }
 
   for (const match of matches) {
-    lines.push(...matchToEvent(match, teamName, { includeReminder }));
+    lines.push(...matchToEvent(match, teamName, { reminderMinutes }));
   }
 
   lines.push('END:VCALENDAR');
