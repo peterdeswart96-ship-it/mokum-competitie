@@ -28,6 +28,7 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: https://func-mokum-competitie.azurewebsites.net/api
+          VITE_BASE: /test/
 
       - name: Deploy naar GitHub Pages (test)
         uses: peaceiris/actions-gh-pages@v4
