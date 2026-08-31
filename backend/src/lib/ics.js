@@ -1,5 +1,5 @@
 const DEFAULT_DURATION_MINUTES = 240;
-const DEFAULT_REMINDER_MINUTES = 60;
+const DEFAULT_REMINDER_MINUTES = 1440;
 
 function foldLine(line) {
   const bytes = Buffer.byteLength(line, 'utf8');

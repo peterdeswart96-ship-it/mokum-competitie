@@ -121,7 +121,7 @@ function Wizard({ teams, answers, setAnswers }) {
 function Dashboard() {
   const [teams, setTeams] = useState([])
   const [answers, setAnswers] = useState({ poolcentrum: '', regio: '', niveauCategorie: '', teamSlug: '' })
-  const [reminder, setReminder] = useState('60')
+  const [reminder, setReminder] = useState('1440')
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [error, setError] = useState(false)
   const [refreshing, setRefreshing] = useState(false)

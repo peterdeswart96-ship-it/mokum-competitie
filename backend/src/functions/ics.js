@@ -16,9 +16,12 @@ app.http('ics', {
 
     const ALLOWED_REMINDER_MINUTES = [0, 60, 120, 240, 1440];
     const reminderParam = request.query.get('reminder');
-    const reminderMinutes = reminderParam === 'off'
-      ? 0
-      : ALLOWED_REMINDER_MINUTES.includes(Number(reminderParam)) ? Number(reminderParam) : 60;
+    let reminderMinutes = 1440;
+    if (reminderParam === 'off') {
+      reminderMinutes = 0;
+    } else if (reminderParam !== null && ALLOWED_REMINDER_MINUTES.includes(Number(reminderParam))) {
+      reminderMinutes = Number(reminderParam);
+    }
 
     try {
       const tournament = await getTournamentData(team.cuescoreTournamentId, context);
