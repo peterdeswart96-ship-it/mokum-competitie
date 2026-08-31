@@ -1,0 +1,12 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "src/functions/index.js",
+  "scripts": {
+    "start": "func start",
+    "build": "echo 'no build needed'"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.0.0"
+  }
+}

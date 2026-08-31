@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(*)",
+      "Write(frontend/**)",
+      "Write(backend/**)",
+      "Write(.github/**)",
+      "Bash(git *)",
+      "Bash(npm *)",
+      "Bash(cd *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Write(.env*)"
+    ]
+  }
+}

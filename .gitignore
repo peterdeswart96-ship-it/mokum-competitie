@@ -1,0 +1,7 @@
+node_modules/
+.env
+.env.local
+local.settings.json
+dist/
+.func/
+function.zip
