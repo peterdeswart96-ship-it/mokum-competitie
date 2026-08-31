@@ -25,24 +25,43 @@ Lees dat bestand eerst bij twijfel over scope, requirements of eerdere keuzes.
 - Backend: Azure Functions (Node.js) — cuescore-datasync + ICS/webcal-generatie
 - CI/CD via GitHub Actions
 
-## Openstaande punten (eerste Develop-taken, in volgorde)
-1. **Cuescore API verkennen** (`api.cuescore.com`, bèta, nauwelijks gedocumenteerd) —
-   endpoints, velden, of spelersopstelling per wedstrijd beschikbaar is. Testen met
-   tournament-ID `83574424` (Pool Noord-Holland Eerste Klasse 2026/2027).
-2. **Datamodel** voor generieke opzet — config per team/competitie (bv. JSON met cuescore-
-   tournament-ID per team), zodat nieuwe teams later eenvoudig toegevoegd kunnen worden.
-3. **Venue-lookup tabel** — cuescore geeft alleen locatienamen, geen adressen; nodig voor
-   bruikbare ICS-locaties.
-4. **ICS/webcal-generator** met VALARM (herinnering, uitzetbaar).
-5. **Dashboard-UI**: team-/competitieselector, hoofdknop "voeg toe aan agenda", geavanceerde
-   opties ingeklapt.
-6. **Achtergrond-sync**: Azure Function timer-trigger + handmatige ververs-knop.
-7. **Wedstrijddetail-overzicht** voor captains (afhankelijk van punt 1 — spelersdata).
+## Openstaande punten (voortgang per 2026-08-31)
+1. ✅ **Cuescore API verkend** — echte endpoints zijn `GET api.cuescore.com/tournament/?id=`
+   en `/participant/?id=`. Matchdata bevat volledig venue-adres per wedstrijd en een
+   bevestigde match-URL (`cuescore.com/match/{matchId}`). Zie `backend/src/lib/cuescore.js`.
+2. ✅ **Datamodel** — `backend/src/config/teams.json`, gevuld met Mokum Mayhem
+   (tournamentId `83574424`, teamId `2852247`).
+3. ✅ **Venue-lookup grotendeels opgelost** — cuescore levert zelf het volledige adres per
+   wedstrijd (geverifieerd voor alle 4 venues in dit seizoen), geen losse tabel nodig gebleken.
+   Alleen relevant als een adres ooit ontbreekt/klopt niet.
+4. ✅ **ICS/webcal-generator** — `backend/src/lib/ics.js`, VALARM uitzetbaar via
+   `?reminder=off`. Aanname: wedstrijdduur 3 uur (cuescore geeft geen stoptime) — nog te
+   bevestigen met Peter.
+5. ✅ **Dashboard-UI (eerste versie)** — `frontend/src/App.jsx`: teamselector, hoofdknop
+   "voeg toe aan agenda" (webcal), ingeklapt geavanceerd blok (herinnering-toggle + .ics-
+   download).
+6. **Nog te doen — achtergrond-sync**: de ICS-functie haalt nu live bij elk verzoek op bij
+   cuescore (geen caching). Timer-trigger + ververs-knop nog te bouwen; ook relevant voor
+   DEFINE.md's aanbeveling om niet per bezoek van cuescore's bèta-API af te hangen.
+7. **Nog te doen — wedstrijddetail-overzicht** voor captains. Teamroster (captain + leden)
+   is beschikbaar via `/participant/`, maar dat is niet per se de opstelling van één
+   specifieke wedstrijd — nog te verifiëren of cuescore dat apart bijhoudt.
+
+## Azure-resources (rg-mokum-competitie, westeurope)
+- Function App: `func-mokum-competitie` (Linux, Node 24 — Node 20 is inmiddels EOL,
+  dus lesson [1] uit de tools-repo setup-script is achterhaald op dit punt)
+- Storage account: `stmokumcompetitie`
+- Budget: €10/maand, alerts bij 50/80/100% naar peterdeswart96@gmail.com
 
 ## Setup
-Gebruik de bestaande skills voor de repo- en domeinopzet:
-- `pdscloud-project-setup` — GitHub repo, branches, GitHub Actions, DNS, Azure infra, Claude Code-config
-- `github-pages-subdomain` — subdomein `mokum-competitie.pdscloud.nl` koppelen aan de repo
+De skills `pdscloud-project-setup` en `github-pages-subdomain` bleken niet aanwezig op de
+gebruikte machine (2026-08-31) — repo, branches, workflows, Azure-infra en GitHub Pages zijn
+handmatig opgezet via Azure CLI/gh CLI (zie git-historie voor de exacte commits). Check bij
+een nieuwe sessie eerst of de skills wél beschikbaar zijn; zo niet, is de git-historie hier
+het beste referentiepunt voor de gevolgde stappen.
+
+Test-omgeving is een subpad op hetzelfde domein (`mokum-competitie.pdscloud.nl/test`), geen
+apart testdomein — zie DEFINE.md §Technische aanpak voor de reden.
 
 Werk stap voor stap, wacht op bevestiging van Peter voordat je verdergaat, en geef altijd
 volledige bestandsinhoud (geen instructies om regels handmatig te wijzigen).

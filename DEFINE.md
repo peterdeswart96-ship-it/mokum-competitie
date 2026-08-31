@@ -96,7 +96,9 @@ Doel: het project draaiend houden **binnen gratis tiers** van GitHub en Azure, g
 Zelfde patroon als Peters overige pdscloud.nl-projecten:
 - GitHub-repo onder `peterdeswart96-ship-it`, branches `main` (productie) en `develop` (test)
 - Frontend: React + Vite + Tailwind CSS
-- Hosting: GitHub Pages, custom domain `mokum-competitie.pdscloud.nl` (test: `mokum-competitie.test.pdscloud.nl`)
+- Hosting: GitHub Pages, custom domain `mokum-competitie.pdscloud.nl` (test: subpad
+  `mokum-competitie.pdscloud.nl/test`, niet een apart testdomein — GitHub Pages
+  ondersteunt maar één custom domain per repo; besloten tijdens Develop, 2026-08-31)
 - Backend: Azure Functions (Node.js) voor de cuescore-datasync en ICS-generatie
 - CI/CD via GitHub Actions
 - Claude Code-compatibele projectstructuur (`.claude/`-map)
