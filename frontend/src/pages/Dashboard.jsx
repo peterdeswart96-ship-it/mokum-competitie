@@ -102,6 +102,8 @@ function Dashboard() {
   const [reminder, setReminder] = useState('60')
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [error, setError] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [refreshMsg, setRefreshMsg] = useState('')
 
   useEffect(() => {
     fetch(`${API_URL}/teams`)
@@ -130,6 +132,19 @@ function Dashboard() {
   const reminderParam = `?reminder=${reminder}`
   const icsHttpsUrl = teamSlug ? `${API_URL}/ics/${teamSlug}${reminderParam}` : ''
   const icsWebcalUrl = icsHttpsUrl.replace(/^https?:\/\//, 'webcal://')
+
+  function ververs() {
+    setRefreshing(true)
+    setRefreshMsg('')
+    fetch(`${API_URL}/ververs`, { method: 'POST' })
+      .then((res) => {
+        if (!res.ok) throw new Error('request failed')
+        return res.json()
+      })
+      .then(() => setRefreshMsg('Schema ververst.'))
+      .catch(() => setRefreshMsg('Verversen mislukt, probeer het later opnieuw.'))
+      .finally(() => setRefreshing(false))
+  }
 
   return (
     <div className="min-h-screen bg-mokum-bg text-mokum-text">
@@ -213,6 +228,21 @@ function Dashboard() {
                   >
                     Download los .ics-bestand
                   </a>
+
+                  <div>
+                    <button
+                      type="button"
+                      onClick={ververs}
+                      disabled={refreshing}
+                      className="text-sm text-mokum-redlight hover:underline disabled:opacity-50"
+                    >
+                      {refreshing ? 'Bezig met verversen…' : 'Ververs schema nu'}
+                    </button>
+                    {refreshMsg && <p className="text-xs text-mokum-dim mt-1">{refreshMsg}</p>}
+                    <p className="text-xs text-mokum-dim mt-1">
+                      Het schema ververst zelf ook elk uur op de achtergrond.
+                    </p>
+                  </div>
                 </div>
               )}
             </>
