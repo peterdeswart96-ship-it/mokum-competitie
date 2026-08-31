@@ -5,3 +5,4 @@ local.settings.json
 dist/
 .func/
 function.zip
+.claude/scheduled_tasks.lock
