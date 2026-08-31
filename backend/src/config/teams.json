@@ -6,5 +6,37 @@
     "competitionName": "Pool Noord-Holland Eerste Klasse 2026/2027",
     "cuescoreTournamentId": 83574424,
     "cuescoreTeamId": 2852247
+  },
+  {
+    "teamSlug": "mokum-remastered",
+    "teamName": "Mokum Remastered",
+    "club": "Mokum Pool & Darts",
+    "competitionName": "Pool Noord-Holland Eerste Klasse 2026/2027",
+    "cuescoreTournamentId": 83574424,
+    "cuescoreTeamId": 86022103
+  },
+  {
+    "teamSlug": "mokum-magic",
+    "teamName": "Mokum Magic",
+    "club": "Mokum Pool & Darts",
+    "competitionName": "Pool Noord-Holland Eerste Klasse 2026/2027",
+    "cuescoreTournamentId": 83574424,
+    "cuescoreTeamId": 62955652
+  },
+  {
+    "teamSlug": "mokum-mavericks",
+    "teamName": "Mokum Mavericks",
+    "club": "Mokum Pool & Darts",
+    "competitionName": "Pool Noord-Holland Eerste Klasse 2026/2027",
+    "cuescoreTournamentId": 83574424,
+    "cuescoreTeamId": 1266638
+  },
+  {
+    "teamSlug": "mokumse-maaiers",
+    "teamName": "Mokumse Maaiers",
+    "club": "Mokum Pool & Darts",
+    "competitionName": "Pool Noord-Holland Eerste Klasse 2026/2027",
+    "cuescoreTournamentId": 83574424,
+    "cuescoreTeamId": 1176531
   }
 ]
