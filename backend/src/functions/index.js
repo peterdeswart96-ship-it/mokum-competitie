@@ -1,1 +1,2 @@
 require('./ics');
+require('./teams');
