@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 
@@ -12,9 +12,93 @@ const REMINDER_OPTIONS = [
   { value: 'off', label: 'Geen herinnering' },
 ]
 
+// Generieke keuze-wizard: elke stap filtert de teamlijst op de eerdere antwoorden en
+// toont de resterende unieke waarden. Nu is er per stap vaak maar één optie (alleen
+// Mokum, alleen Noord-Holland), maar de wizard groeit vanzelf mee zodra er teams van
+// andere poolcentra/regio's/niveaus bijkomen — geen hardcoded opties nodig.
+const STAPPEN = [
+  { key: 'poolcentrum', vraag: 'Bij welk poolcentrum speel je?' },
+  { key: 'regio', vraag: 'In welke regio?' },
+  { key: 'niveauCategorie', vraag: 'Op welk niveau?' },
+  { key: 'teamSlug', vraag: 'Welk team?' },
+]
+
+function teamsMatchingAnswers(teams, answers) {
+  return teams.filter((t) =>
+    Object.entries(answers).every(([key, value]) => !value || t[key] === value)
+  )
+}
+
+function opties(stapKey, teams, answers) {
+  const gefilterd = teamsMatchingAnswers(teams, answers)
+  if (stapKey === 'teamSlug') {
+    return gefilterd.map((t) => ({ value: t.teamSlug, label: t.teamName, sub: t.niveau }))
+  }
+  const uniek = [...new Set(gefilterd.map((t) => t[stapKey]).filter(Boolean))]
+  return uniek.map((v) => ({ value: v, label: v }))
+}
+
+function Wizard({ teams, answers, setAnswers }) {
+  const huidigeStapIndex = STAPPEN.findIndex((s) => !answers[s.key])
+  const beantwoord = STAPPEN.slice(0, huidigeStapIndex)
+
+  function kies(stapKey, value) {
+    const na = STAPPEN.findIndex((s) => s.key === stapKey)
+    const nieuw = { ...answers, [stapKey]: value }
+    // eerdere keuze wijzigen? verder gelegen antwoorden vervallen dan
+    for (const s of STAPPEN.slice(na + 1)) nieuw[s.key] = ''
+    setAnswers(nieuw)
+  }
+
+  const huidigeStap = STAPPEN[huidigeStapIndex]
+  const huidigeOpties = huidigeStap ? opties(huidigeStap.key, teams, answers) : []
+
+  return (
+    <div>
+      {beantwoord.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {beantwoord.map((s) => (
+            <button
+              key={s.key}
+              type="button"
+              onClick={() => kies(s.key, '')}
+              className="text-xs bg-mokum-bg border border-mokum-border rounded-full px-3 py-1 text-mokum-dim hover:text-white hover:border-mokum-red"
+              title="Wijzig deze keuze"
+            >
+              {answers[s.key]} ✕
+            </button>
+          ))}
+        </div>
+      )}
+
+      {huidigeStap && (
+        <>
+          <h2 className="text-sm font-medium text-mokum-text mb-2">{huidigeStap.vraag}</h2>
+          <div className="space-y-2">
+            {huidigeOpties.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => kies(huidigeStap.key, opt.value)}
+                className="block w-full text-left bg-mokum-bg border border-mokum-border rounded-lg px-4 py-3 hover:border-mokum-red transition-colors"
+              >
+                <div className="text-white font-medium">{opt.label}</div>
+                {opt.sub && <div className="text-xs text-mokum-dim mt-0.5">{opt.sub}</div>}
+              </button>
+            ))}
+            {huidigeOpties.length === 0 && (
+              <p className="text-mokum-dim text-sm">Geen teams gevonden voor deze combinatie.</p>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 function Dashboard() {
   const [teams, setTeams] = useState([])
-  const [teamSlug, setTeamSlug] = useState('')
+  const [answers, setAnswers] = useState({ poolcentrum: '', regio: '', niveauCategorie: '', teamSlug: '' })
   const [reminder, setReminder] = useState('60')
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [error, setError] = useState(false)
@@ -27,10 +111,21 @@ function Dashboard() {
       })
       .then((data) => {
         setTeams(data)
-        if (data.length > 0) setTeamSlug(data[0].teamSlug)
+        // Als er maar één mogelijke waarde is per stap, alvast invullen zodat je niet
+        // door schijnkeuzes hoeft te klikken (bv. nu alleen "Mokum" en "Noord-Holland").
+        let voorlopig = { poolcentrum: '', regio: '', niveauCategorie: '', teamSlug: '' }
+        for (const stap of STAPPEN) {
+          const mogelijk = opties(stap.key, data, voorlopig)
+          if (mogelijk.length === 1) voorlopig = { ...voorlopig, [stap.key]: mogelijk[0].value }
+          else break
+        }
+        setAnswers(voorlopig)
       })
       .catch(() => setError(true))
   }, [])
+
+  const teamSlug = answers.teamSlug
+  const team = useMemo(() => teams.find((t) => t.teamSlug === teamSlug), [teams, teamSlug])
 
   const reminderParam = `?reminder=${reminder}`
   const icsHttpsUrl = teamSlug ? `${API_URL}/ics/${teamSlug}${reminderParam}` : ''
@@ -53,22 +148,24 @@ function Dashboard() {
             </p>
           )}
 
-          {!error && teams.length > 0 && (
+          {!error && teams.length > 0 && !team && (
+            <Wizard teams={teams} answers={answers} setAnswers={setAnswers} />
+          )}
+
+          {!error && team && (
             <>
-              <label className="block text-sm font-medium text-mokum-text mb-1">
-                Team
-              </label>
-              <select
-                className="w-full bg-mokum-bg border border-mokum-border rounded-lg px-3 py-2 mb-6 text-white"
-                value={teamSlug}
-                onChange={(e) => setTeamSlug(e.target.value)}
+              <button
+                type="button"
+                onClick={() => setAnswers({ ...answers, teamSlug: '' })}
+                className="text-xs text-mokum-dim hover:text-white mb-4"
               >
-                {teams.map((t) => (
-                  <option key={t.teamSlug} value={t.teamSlug}>
-                    {t.teamName} — {t.competitionName}
-                  </option>
-                ))}
-              </select>
+                ← Ander team kiezen
+              </button>
+
+              <div className="bg-mokum-bg border border-mokum-border rounded-lg px-4 py-3 mb-6">
+                <div className="text-white font-bold">{team.teamName}</div>
+                <div className="text-xs text-mokum-dim mt-0.5">{team.competitionName}</div>
+              </div>
 
               <a
                 href={icsWebcalUrl}

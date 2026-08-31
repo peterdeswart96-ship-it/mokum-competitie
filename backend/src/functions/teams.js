@@ -6,12 +6,19 @@ app.http('teams', {
   methods: ['GET'],
   authLevel: 'anonymous',
   handler: async () => {
-    const publicTeams = teams.map(({ teamSlug, teamName, club, competitionName }) => ({
-      teamSlug,
-      teamName,
-      club,
-      competitionName,
-    }));
+    const publicTeams = teams.map(
+      ({ teamSlug, teamName, club, poolcentrum, regio, niveauCategorie, niveau, seizoen, competitionName }) => ({
+        teamSlug,
+        teamName,
+        club,
+        poolcentrum,
+        regio,
+        niveauCategorie,
+        niveau,
+        seizoen,
+        competitionName,
+      })
+    );
 
     return {
       status: 200,
