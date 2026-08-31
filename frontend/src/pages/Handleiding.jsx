@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import Header from '../components/Header'
 
 function Stap({ nummer, children }) {
@@ -22,6 +23,14 @@ function Platform({ titel, children }) {
 }
 
 function Handleiding() {
+  const location = useLocation()
+
+  useEffect(() => {
+    if (!location.hash) return
+    const el = document.getElementById(location.hash.slice(1))
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [location.hash])
+
   return (
     <div className="min-h-screen bg-mokum-bg text-mokum-text">
       <Header title="Handleiding" subtitle="Agenda toevoegen op PC en mobiel" />
@@ -67,6 +76,21 @@ function Handleiding() {
           <Stap nummer="1">Kopieer de link achter <strong className="text-white">"Download los .ics-bestand"</strong> (onder "Geavanceerde opties"), met <code className="text-xs bg-mokum-bg px-1 py-0.5 rounded">https://</code> in plaats van <code className="text-xs bg-mokum-bg px-1 py-0.5 rounded">webcal://</code>.</Stap>
           <Stap nummer="2">Ga in Outlook naar <strong className="text-white">Agenda → Agenda toevoegen → Abonneren via internet</strong>.</Stap>
           <Stap nummer="3">Plak de link en bevestig. Klaar.</Stap>
+        </Platform>
+
+        <Platform titel="📣 Voor aanvoerders: wedstrijddetails delen">
+          <p id="captains" className="text-sm text-mokum-dim mb-3 scroll-mt-20">
+            Elke wedstrijd heeft een eigen detailpagina met datum/tijd, locatie en (voor
+            zover bekend bij Cuescore) de opstelling van beide teams. Handig om te posten
+            in de team-WhatsApp.
+          </p>
+          <Stap nummer="1">Kies je team op de hoofdpagina en scrol naar <strong className="text-white">"Voor aanvoerders"</strong> — daar staan de eerstvolgende wedstrijden.</Stap>
+          <Stap nummer="2">Klik op een wedstrijd om de detailpagina te openen.</Stap>
+          <Stap nummer="3">Klik op <strong className="text-white">"Kopieer voor WhatsApp"</strong> voor een kant-en-klaar tekstblok, of op <strong className="text-white">"Kopieer deelbare link"</strong> om alleen de link te delen — de pagina zelf werkt ook prima als link.</Stap>
+          <p className="text-xs text-mokum-dim mt-3">
+            Staat de opstelling er niet bij? Cuescore houdt niet altijd per wedstrijd bij
+            wie er speelt — de pagina toont dan het teamroster in plaats daarvan.
+          </p>
         </Platform>
 
         <div className="text-xs text-mokum-dim mt-6">

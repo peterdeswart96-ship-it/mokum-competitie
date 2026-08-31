@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
+import { formatWedstrijdDatum } from '../lib/datum'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:7071/api'
 
@@ -104,6 +105,7 @@ function Dashboard() {
   const [error, setError] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [refreshMsg, setRefreshMsg] = useState('')
+  const [wedstrijden, setWedstrijden] = useState([])
 
   useEffect(() => {
     fetch(`${API_URL}/teams`)
@@ -129,6 +131,17 @@ function Dashboard() {
   const teamSlug = answers.teamSlug
   const team = useMemo(() => teams.find((t) => t.teamSlug === teamSlug), [teams, teamSlug])
 
+  useEffect(() => {
+    if (!teamSlug) {
+      setWedstrijden([])
+      return
+    }
+    fetch(`${API_URL}/wedstrijden/${teamSlug}`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setWedstrijden)
+      .catch(() => setWedstrijden([]))
+  }, [teamSlug])
+
   const reminderParam = `?reminder=${reminder}`
   const icsHttpsUrl = teamSlug ? `${API_URL}/ics/${teamSlug}${reminderParam}` : ''
   const icsWebcalUrl = icsHttpsUrl.replace(/^https?:\/\//, 'webcal://')
@@ -150,7 +163,7 @@ function Dashboard() {
     <div className="min-h-screen bg-mokum-bg text-mokum-text">
       <Header title="Competitie Agenda" subtitle="Wedstrijdschema in je eigen agenda" />
 
-      <main className="flex items-start justify-center p-6">
+      <main className="flex flex-col items-center p-6">
         <div className="w-full max-w-md bg-mokum-card rounded-2xl border border-mokum-border p-8 mt-6">
           <h1 className="font-heading text-xl text-white mb-1">Kies je team</h1>
           <p className="text-mokum-dim mb-6 text-sm">
@@ -248,6 +261,29 @@ function Dashboard() {
             </>
           )}
         </div>
+
+        {team && wedstrijden.length > 0 && (
+          <div className="w-full max-w-md bg-mokum-card rounded-2xl border border-mokum-border p-8 mt-4">
+            <h2 className="font-heading text-base text-white mb-1">Voor aanvoerders</h2>
+            <p className="text-mokum-dim text-xs mb-4">
+              Wedstrijddetails met opstelling, om te delen in de team-app
+            </p>
+            <div className="space-y-2">
+              {wedstrijden.slice(0, 3).map((m) => (
+                <Link
+                  key={m.matchId}
+                  to={`/wedstrijd/${teamSlug}/${m.matchId}`}
+                  className="block bg-mokum-bg border border-mokum-border rounded-lg px-4 py-3 hover:border-mokum-red transition-colors"
+                >
+                  <div className="text-white text-sm font-medium">
+                    {m.isHome ? `${team.teamName} - ${m.opponent}` : `${m.opponent} - ${team.teamName}`}
+                  </div>
+                  <div className="text-xs text-mokum-dim mt-0.5">{formatWedstrijdDatum(m.starttime)}</div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )

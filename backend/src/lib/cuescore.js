@@ -39,4 +39,24 @@ function getTeamMatches(tournament, teamId) {
     .sort((a, b) => new Date(a.starttime) - new Date(b.starttime));
 }
 
-module.exports = { fetchTournament, fetchTeamRoster, getTeamMatches };
+function getMatchDetail(tournament, matchId) {
+  const m = tournament.matches.find((match) => match.matchId === Number(matchId));
+  if (!m) return null;
+
+  // playerA is in cuescore's eigen data altijd de thuisspelende partij (het venue-veld
+  // zit ook alleen op playerA) — zie backend/src/lib/cuescore.js getTeamMatches hierboven.
+  const venue = m.playerA.venue;
+  return {
+    matchId: m.matchId,
+    matchUrl: `${MATCH_URL_BASE}/${m.matchId}`,
+    roundName: m.roundName,
+    starttime: m.starttime,
+    matchStatus: m.matchstatus,
+    venueName: venue?.name ?? '',
+    venueAddress: venue?.address ?? '',
+    home: { teamId: m.playerA.teamId, name: m.playerA.name },
+    away: { teamId: m.playerB.teamId, name: m.playerB.name },
+  };
+}
+
+module.exports = { fetchTournament, fetchTeamRoster, getTeamMatches, getMatchDetail };
