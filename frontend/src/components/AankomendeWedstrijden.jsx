@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Inklapbaar from './Inklapbaar'
 import { formatWedstrijdDatum } from '../lib/datum'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:7071/api'
@@ -81,12 +82,7 @@ function AankomendeWedstrijden({ teams }) {
   const groepen = useMemo(() => groepeerPerNiveau(teams), [teams])
 
   return (
-    <div className="w-full max-w-md bg-mokum-card rounded-2xl border border-mokum-border p-8 mt-4">
-      <h2 className="font-heading text-base text-white mb-1">Aankomende wedstrijden</h2>
-      <p className="text-mokum-dim text-xs mb-4">
-        Vink teams aan om te filteren
-      </p>
-
+    <Inklapbaar titel="Aankomende Mokum team wedstrijden weergeven" subtitel="Vink teams aan om te filteren" defaultOpen={false}>
       <div className="flex justify-end gap-3 text-xs text-mokum-redlight mb-2">
         <button type="button" onClick={() => setGeselecteerd(new Set(teams.map((t) => t.teamSlug)))} className="hover:underline">
           Alles aan
@@ -162,7 +158,7 @@ function AankomendeWedstrijden({ teams }) {
           ))}
         </div>
       )}
-    </div>
+    </Inklapbaar>
   )
 }
 

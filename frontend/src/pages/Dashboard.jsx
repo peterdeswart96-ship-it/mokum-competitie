@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
+import Inklapbaar from '../components/Inklapbaar'
 import AankomendeWedstrijden from '../components/AankomendeWedstrijden'
 import { formatWedstrijdDatum } from '../lib/datum'
 
@@ -178,11 +179,7 @@ function Dashboard() {
       <Header title="Competitie Agenda" subtitle="Wedstrijdschema in je eigen agenda" />
 
       <main className="flex flex-col items-center p-6">
-        <div className="w-full max-w-md bg-mokum-card rounded-2xl border border-mokum-border p-8 mt-6">
-          <h1 className="font-heading text-xl text-white mb-1">Kies je team</h1>
-          <p className="text-mokum-dim mb-6 text-sm">
-            Krijg je wedstrijdschema automatisch in je agenda
-          </p>
+        <Inklapbaar titel="Mokum team wedstrijden aan je agenda toevoegen" subtitel="Krijg je wedstrijdschema automatisch in je agenda">
 
           {error && (
             <p className="text-mokum-redlight mb-4">
@@ -274,7 +271,7 @@ function Dashboard() {
               )}
             </>
           )}
-        </div>
+        </Inklapbaar>
 
         {teams.length > 0 && <AankomendeWedstrijden teams={teams} />}
 
