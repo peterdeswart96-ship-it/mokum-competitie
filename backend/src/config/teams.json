@@ -13,6 +13,19 @@
     "cuescoreTeamId": 2852247
   },
   {
+    "teamSlug": "restless",
+    "teamName": "Restless",
+    "club": "Mokum Pool & Darts",
+    "poolcentrum": "Mokum",
+    "regio": "Noord-Holland",
+    "niveauCategorie": "Klasse",
+    "niveau": "Eerste Klasse",
+    "seizoen": "2026/2027",
+    "competitionName": "Pool Noord-Holland Eerste Klasse 2026/2027",
+    "cuescoreTournamentId": 83574424,
+    "cuescoreTeamId": 1176532
+  },
+  {
     "teamSlug": "mokum-remastered",
     "teamName": "Mokum Remastered",
     "club": "Mokum Pool & Darts",
