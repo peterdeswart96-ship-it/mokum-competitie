@@ -40,9 +40,13 @@ function addMinutes(isoString, minutes) {
 }
 
 function matchToEvent(match, teamName, { reminderMinutes = DEFAULT_REMINDER_MINUTES } = {}) {
+  // match.teamName wint van het algemene teamName-argument: gebruikt door de
+  // gecombineerde "alle thuiswedstrijden"-feed, waar elke wedstrijd van een ander
+  // Mokum-team kan zijn (zie backend/src/functions/icsIntern.js).
+  const eigenTeam = match.teamName ?? teamName;
   const summary = match.isHome
-    ? `${teamName} - ${match.opponent}`
-    : `${match.opponent} - ${teamName}`;
+    ? `${eigenTeam} - ${match.opponent}`
+    : `${match.opponent} - ${eigenTeam}`;
   const location = [match.venueName, match.venueAddress].filter(Boolean).join(', ');
   const description = `${match.roundName}\nCuescore: ${match.matchUrl}`;
   const dtStart = toIcsDate(match.starttime);

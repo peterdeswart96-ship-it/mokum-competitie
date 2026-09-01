@@ -297,6 +297,10 @@ function Dashboard() {
             </div>
           </div>
         )}
+
+        <Link to="/intern" className="text-xs text-mokum-dim hover:text-white mt-6">
+          Intern 🔒
+        </Link>
       </main>
     </div>
   )
