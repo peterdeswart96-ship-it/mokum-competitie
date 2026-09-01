@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
+import AankomendeWedstrijden from '../components/AankomendeWedstrijden'
 import { formatWedstrijdDatum } from '../lib/datum'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:7071/api'
@@ -274,6 +275,8 @@ function Dashboard() {
             </>
           )}
         </div>
+
+        {teams.length > 0 && <AankomendeWedstrijden teams={teams} />}
 
         {team && wedstrijden.length > 0 && (
           <div className="w-full max-w-md bg-mokum-card rounded-2xl border border-mokum-border p-8 mt-4">
