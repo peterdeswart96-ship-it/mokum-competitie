@@ -141,7 +141,11 @@ function AankomendeWedstrijden({ teams }) {
       )}
 
       {!laden && gefilterd.length > 0 && (
-        <div className="space-y-2 max-h-96 overflow-y-auto">
+        <>
+          <p className="text-mokum-redlight text-xs mb-2">
+            Klik een wedstrijd aan om alle details te bekijken en/of te delen
+          </p>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
           {gefilterd.map((m) => (
             <Link
               key={`${m.teamSlug}-${m.matchId}`}
@@ -156,7 +160,8 @@ function AankomendeWedstrijden({ teams }) {
               </div>
             </Link>
           ))}
-        </div>
+          </div>
+        </>
       )}
     </Inklapbaar>
   )
